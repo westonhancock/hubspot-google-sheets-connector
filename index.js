@@ -1,5 +1,5 @@
-const vars = require('./variables.js');
-const { writeToSheet } = require('./write-to-sheet.js');
+const vars = require('./src/variables.js');
+const { writeToSheet } = require('./src/write-to-sheet.js');
 const fs = require('fs');
 
 let objIdIndex = vars.OBJ_ID_START || undefined;
