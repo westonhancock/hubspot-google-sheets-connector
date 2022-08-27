@@ -50,7 +50,7 @@ let sheetConfig = {
 }
 
 let hubspotConfig = {
-    after: objIdIndex,
+    objId: objIdIndex,
     archived: false,
     associations: undefined,
     limit: vars.LIMIT,
@@ -72,16 +72,10 @@ const end = function() {
     logIndex();
 }
 
-// const authentication  = async () => {
-//     const googleClient = await vars.GOOGLE_AUTH.getClient();
-//     const sheets = google.sheets({ version: 'v4', auth: googleClient });
-//     return { sheets }
-// }
-
 const increaseIndex = function(next) {
     objIdIndex = next.after;
 
-    hubspotConfig.after = objIdIndex;
+    hubspotConfig.objId = objIdIndex;
 
     fs.writeFile('obj-id-lts.log', objIdIndex, (err) => {
         if (err) throw err;
@@ -104,7 +98,7 @@ const getAllContacts = async function(callback) {
 
 const getContacts = async function() {
     try {
-        const apiResponse = await vars.HUBSPOT_CLIENT.crm.contacts.basicApi.getPage(hubspotConfig.limit, hubspotConfig.after, hubspotConfig.properties, hubspotConfig.propertiesWithHistory, hubspotConfig.associations, hubspotConfig.archived);
+        const apiResponse = await vars.HUBSPOT_CLIENT.crm.contacts.basicApi.getPage(hubspotConfig.limit, hubspotConfig.objId, hubspotConfig.properties, hubspotConfig.propertiesWithHistory, hubspotConfig.associations, hubspotConfig.archived);
         
         let results = apiResponse.results;
         next = apiResponse.paging ? apiResponse.paging.next : next;
@@ -141,18 +135,5 @@ const setRange = function() {
     let rangeEnd = String.fromCharCode(97 + headers.length);
     sheetConfig.range = 'hubspot_contacts!A:' + rangeEnd;
 }
-
-// const setSheetData = async function(config) {
-//     const {sheets} = await authentication();
-
-//     if (sheets) {
-//         try {
-//             await sheets.spreadsheets.values.append(config);
-//             console.log(`Google sheet pupulated range ${config.range} successfully`);
-//         } catch (err) {
-//             console.log(err)
-//         }
-//     }
-// }
 
 main();
