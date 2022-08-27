@@ -1,30 +1,8 @@
+const vars = require('./variables.js');
+const { writeToSheet } = require('./write-to-sheet.js');
 const fs = require('fs');
-const { google } = require('googleapis');
-const hubspot = require('@hubspot/api-client');
 
-require('dotenv').config();
-
-const API_KEY = process.env.API_KEY;
-const DEFUALT_RANGE = 'hubspot_contacts!A:G';
-const LIMIT = process.env.LIMIT || 10;
-const OBJ_ID_START = process.env.OBJ_ID_START || '';
-const PATH_TO_JSON_KEY = process.env.PATH_TO_JSON_KEY;
-const SHEET_ID = process.env.SHEET_ID;
-
-if (!API_KEY) throw new Error('Missing API_KEY environment variable.');
-if (!PATH_TO_JSON_KEY) throw new Error('Missing PATH_TO_JSON_KEY environment variable.');
-if (!SHEET_ID) throw new Error('Missing SHEET_ID environment variable.');
-
-const googleAuth = new google.auth.GoogleAuth({
-    keyFile: PATH_TO_JSON_KEY,
-    scopes: 'https://www.googleapis.com/auth/spreadsheets', 
-});
-
-const hubspotClient = new hubspot.Client({
-    'accessToken': API_KEY
-});
-
-let objIdIndex = OBJ_ID_START || undefined;
+let objIdIndex = vars.OBJ_ID_START || undefined;
 let objIdLog = objIdIndex ? objIdIndex + '\n' : '';
 
 let trackedProperties = [
@@ -62,9 +40,9 @@ let next;
 let items = next ? [] : [headers];
 
 let sheetConfig = {
-    auth: googleAuth,
-    spreadsheetId: SHEET_ID,
-    range: DEFUALT_RANGE,
+    auth: vars.GOOGLE_AUTH,
+    spreadsheetId: vars.SHEET_ID,
+    range: vars.DEFUALT_RANGE,
     valueInputOption: 'USER_ENTERED',
     resource: {
         values: items,
@@ -75,7 +53,7 @@ let hubspotConfig = {
     after: objIdIndex,
     archived: false,
     associations: undefined,
-    limit: LIMIT,
+    limit: vars.LIMIT,
     properties: properties,
     propertiesWithHistory: undefined,
 };
@@ -90,15 +68,15 @@ const main = function() {
 };
 
 const end = function() {
-    setSheetData();
+    writeToSheet(sheetConfig);
     logIndex();
 }
 
-const authentication  = async () => {
-    const googleClient = await googleAuth.getClient();
-    const sheets = google.sheets({ version: 'v4', auth: googleClient });
-    return { sheets }
-}
+// const authentication  = async () => {
+//     const googleClient = await vars.GOOGLE_AUTH.getClient();
+//     const sheets = google.sheets({ version: 'v4', auth: googleClient });
+//     return { sheets }
+// }
 
 const increaseIndex = function(next) {
     objIdIndex = next.after;
@@ -126,7 +104,7 @@ const getAllContacts = async function(callback) {
 
 const getContacts = async function() {
     try {
-        const apiResponse = await hubspotClient.crm.contacts.basicApi.getPage(hubspotConfig.limit, hubspotConfig.after, hubspotConfig.properties, hubspotConfig.propertiesWithHistory, hubspotConfig.associations, hubspotConfig.archived);
+        const apiResponse = await vars.HUBSPOT_CLIENT.crm.contacts.basicApi.getPage(hubspotConfig.limit, hubspotConfig.after, hubspotConfig.properties, hubspotConfig.propertiesWithHistory, hubspotConfig.associations, hubspotConfig.archived);
         
         let results = apiResponse.results;
         next = apiResponse.paging ? apiResponse.paging.next : next;
@@ -134,8 +112,8 @@ const getContacts = async function() {
         parseData(results);
         
         return next;
-    } catch (e) {
-        e.message === 'HTTP request failed' ? console.error(JSON.stringify(e.response, null, 2)) : console.error(e)
+    } catch (err) {
+        err.message === 'HTTP request failed' ? console.error(JSON.stringify(err.response, null, 2)) : console.error(err)
     }
     return null;
 }
@@ -164,17 +142,17 @@ const setRange = function() {
     sheetConfig.range = 'hubspot_contacts!A:' + rangeEnd;
 }
 
-const setSheetData = async function() {
-    const {sheets} = await authentication();
-    
-    if (sheets) {
-        try {
-            await sheets.spreadsheets.values.append(sheetConfig);
-            console.log('Google sheet pupulated successfully');
-        } catch (e) {
-            console.log(e)
-        }
-    }
-}
+// const setSheetData = async function(config) {
+//     const {sheets} = await authentication();
+
+//     if (sheets) {
+//         try {
+//             await sheets.spreadsheets.values.append(config);
+//             console.log(`Google sheet pupulated range ${config.range} successfully`);
+//         } catch (err) {
+//             console.log(err)
+//         }
+//     }
+// }
 
 main();
