@@ -10,12 +10,12 @@ const authentication  = async () => {
 exports.writeToSheet = async function(config) {
     const { sheets } = await authentication();
 
-    // if (sheets) {
-    //     try {
-    //         await sheets.spreadsheets.values.append(config);
-    //         console.log(`Google sheet pupulated range ${config.range} successfully`);
-    //     } catch (err) {
-    //         console.log(err)
-    //     }
-    // }
+    if (sheets) {
+        try {
+            await sheets.spreadsheets.values.append(config);
+            console.log(`Google sheet pupulated range ${config.range} successfully`);
+        } catch (err) {
+            console.log(err)
+        }
+    }
 }

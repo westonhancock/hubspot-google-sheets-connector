@@ -133,7 +133,7 @@ const parseData = function(data) {
 
 const setRange = function() {
     let rangeEnd = String.fromCharCode(97 + headers.length);
-    sheetConfig.range = 'hubspot_contacts!A:' + rangeEnd;
+    sheetConfig.range = vars.sheetName + '!' + vars.rangeStart + ':' + rangeEnd;
 }
 
 main();
