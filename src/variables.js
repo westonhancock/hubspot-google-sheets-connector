@@ -6,7 +6,7 @@ const OBJ_ID_START = process.env.OBJ_ID_START || '';
 const PATH_TO_JSON_KEY = process.env.PATH_TO_JSON_KEY;
 const SHEET_ID = process.env.SHEET_ID;
 
-let sheetName = 'testing';
+let sheetName = 'hubspot_contacts';
 let rangeStart = 'A';
 let rangeEnd = 'G';
 const DEFUALT_RANGE = sheetName + '!' + rangeStart + ':' + rangeEnd;
@@ -46,4 +46,4 @@ exports.SHEET_ID = SHEET_ID;
 exports.sheetName = sheetName;
 exports.rangeStart = rangeStart;
 exports.propsType = 'contacts';
-exports.append = false;
+exports.append = true;

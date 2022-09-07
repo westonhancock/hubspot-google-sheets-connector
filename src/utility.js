@@ -7,7 +7,7 @@ exports.getRange = function(name, arr) {
 };
 
 exports.logData = function(data, id) {
-    fs.appendFile('./logs/obj-id-index.log', data, (err) => {
+    fs.appendFile('./logs/obj-id-index.log', data, {flag: 'a+'}, (err) => {
         if (err) throw err;
         console.log('obj-id-index.log has been updated with the latest object ID: ' + id);
     });
